@@ -20,15 +20,15 @@ def unzipFolder(zipfile):
     shutil.unpack_archive(zipfile, 'outside')
 
 
-def replaceOnefile(filename, valDict):
-    f = open(filename, 'r+')
+def replaceOnefile(filepath, valdict):
+    f = open(filepath, 'r+')
     lines = f.readlines()
     f.seek(0)
     f.truncate()
 
     for line in lines:
-        for key in valDict:
-            line = line.replace(key, valDict.get(key))
+        for key in valdict:
+            line = line.replace(key, valdict.get(key))
         f.write(line)
     f.close()
 
@@ -51,8 +51,6 @@ def replaceConfigParm(filepath, valdict):
                             line = line.replace(var, value)
             print(line)
             f.write(line)
-
-
 
 
 if __name__ == '__main__':
