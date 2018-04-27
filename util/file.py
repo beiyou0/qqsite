@@ -1,5 +1,18 @@
+import os
 import sys
 import shutil
+import platform
+
+
+# recursivelly delete directory
+def delRurDir(filepath):
+    shutil.rmtree(filepath)
+
+
+# delete one file
+def delFile(filepath):
+    os.remove(filepath)
+
 
 def readFile(filepath):
     with open(filepath, 'r') as f:
@@ -20,21 +33,20 @@ def unzipFolder(zipfile):
     shutil.unpack_archive(zipfile, 'outside')
 
 
-def replaceOnefile(filepath, valdict):
-    f = open(filepath, 'r+')
-    lines = f.readlines()
-    f.seek(0)
-    f.truncate()
+def replaceOnefile(filename, valDict):
+    with open(filename, 'r+') as f:
+        lines = f.readlines()
+        f.seek(0)
+        f.truncate()
 
-    for line in lines:
-        for key in valdict:
-            line = line.replace(key, valdict.get(key))
-        f.write(line)
-    f.close()
+        for line in lines:
+            for key in valDict:
+                line = line.replace(key, valDict.get(key))
+            f.write(line)
 
 
-def replaceConfigParm(filepath, valdict):
-    with open(filepath, 'r+', encoding='utf-8') as f:
+def replaceConfigParm(filename, valdict):
+    with open(filename, 'r+', encoding='utf-8') as f:
         lines = f.readlines()
         f.seek(0)
         f.truncate()
@@ -47,9 +59,9 @@ def replaceConfigParm(filepath, valdict):
                     if parm == key:
                         if var == '':
                             line = line.strip() + value + '\n'
+                            print(line)
                         else:
                             line = line.replace(var, value)
-            print(line)
             f.write(line)
 
 
@@ -59,9 +71,28 @@ if __name__ == '__main__':
     # zipFolder('test')
     # unzipFolder('archive.zip')
     # valdict = {'@ip@': '9.181.128.214', '@host@': 'www.baidu.com'}
-    # replaceOnefile('test/test.conf', valdict)
+    # replaceOnefile('../test/test.conf', valdict)
+
+    # valdict = {'Maker.Port': '9999', 'EngineType': 'Simple', 'testSpace': 'HopeOK'}
+    # # valdict = {'host': '1111', 'address':'street'}
+    # replaceConfigParm('../test/Settings.properties', valdict)
 
     # print(sys.stdin.encoding)
-    # print(sys.stdout.encoding)
-    valdict = {'ip': '9.181.128.214', 'addr':'street no.', 'email':'111@163.com'}
-    replaceConfigParm('util/test/test.conf', valdict)
+
+    # str1 = 'host=@host@'
+    # str2 = 'ip=@ip@'
+    # str3 = 'address= '
+
+    # a1 = str3.split("=")[0].strip()
+    # print(a1)
+    # b1 = str3.split("=")[1].strip()
+    # print(b1)
+    delFile('../test/ttt/aaa')
+
+
+
+
+
+
+
+
