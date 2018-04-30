@@ -2,6 +2,7 @@
 
 import ftplib
 import os
+import fnmatch
 import socket
 import logging
 
@@ -46,8 +47,9 @@ class FTPSync(object):
             return
         logger.info('*** Changed to "%s" folder' % ftppath)
 
-    def downloadFile(self, filename):
+    def downloadFile(self, ftppath, filename):
         try:
+            self.conn.cwd(ftppath)
             ftp_curr_path = self.conn.pwd()
             print('*** ftp current path  - "%s"' % ftp_curr_path)
             self.conn.retrbinary('RETR %s' % filename, open(filename, 'wb').write)
@@ -99,6 +101,15 @@ class FTPSync(object):
             print('ERROR: cannot read file "%s"' % f)
             os.unlink(f)
 
+    def downloadWildcard(self, ftppath, wildcard):
+        files = self.listFile(ftppath)
+        for f in files:
+            if fnmatch.fnmatch(f, wildcard):
+                print(f)
+                self.downloadFile(f)
+
+
+
     def quit(self):
         self.conn.quit()
 
@@ -111,20 +122,27 @@ if __name__ == '__main__':
         os.makedirs(dirname)
     os.chdir(dirname)
 
-    ftp = FTPSync(host)
-    ftp.login('wasup', 'wasup123')
-    ftp.cwdDir('/home/wasup/testftp')
-    # ftp.downloadFile('forDownload.txt')
-    # ftp.uploadFile('forUpload.txt')
-    ftp.downloadFileTree('.')
-    ftp.quit()
-    os.chdir(workdir)
+    # ftp = FTPSync(host)
+    # ftp.login('wasup', 'wasup123')
+    # ftp.cwdDir('/home/wasup/testftp')
+    # # ftp.downloadFile('forDownload.txt')
+    # # ftp.uploadFile('forUpload.txt')
+    # ftp.downloadFileTree('.')
+    # ftp.quit()
+    # os.chdir(workdir)
+    #
+    # # with open('test.txt', 'rb') as f:
+    # #     lines = f.readlines()
+    # #     for line in lines:
+    # #         print(line)
+    # print(os.getcwd())
 
-    # with open('test.txt', 'rb') as f:
-    #     lines = f.readlines()
-    #     for line in lines:
-    #         print(line)
-    print(os.getcwd())
+    files = os.listdir('/Users/liuqq/PycharmProjects/qqsite/util')
+    print(files)
+    for f in files:
+        if fnmatch.fnmatch(f, '*.py'):
+            # self.downloadFile(f)
+            print(f)
 
 
 
