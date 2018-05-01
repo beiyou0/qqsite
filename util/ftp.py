@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-import ftplib
 import os
+import ftplib
 import fnmatch
 import socket
 import logging
@@ -35,9 +35,6 @@ class FTPSync(object):
         # print(file_res)
         return files
 
-    def isDir(self, ftppath, filename):
-        pass
-
     def cwdDir(self, ftppath):
         try:
             self.conn.cwd(ftppath)
@@ -53,15 +50,15 @@ class FTPSync(object):
             ftp_curr_path = self.conn.pwd()
             print('*** ftp current path  - "%s"' % ftp_curr_path)
             self.conn.retrbinary('RETR %s' % filename, open(filename, 'wb').write)
-            # os.chdir(workdir)
         except ftplib.error_perm:
             print('ERROR: cannot read file "%s"' % filename)
             os.unlink(filename)
         else:
             print('*** downloaded "%s" to local directory' % filename)
 
-    def uploadFile(self, filename):
+    def uploadFile(self, ftppath, filename):
         try:
+            self.cwdDir(ftppath)
             ftp_curr_path = self.conn.pwd()
             print('*** ftp current path  - "%s"' % ftp_curr_path)
             self.conn.storbinary('STOR %s' % filename, open(filename, 'rb'))
@@ -71,7 +68,11 @@ class FTPSync(object):
         else:
             print('*** uploaded "%s" to ftp' % filename)
 
-    def downloadFileTree(self, nextdir):
+    def downloadFileTree(self, ftppath):
+        self.conn.cwd(ftppath)
+        self.downloadRecursive('.')
+
+    def downloadRecursive(self, nextdir):
         try:
             self.conn.cwd(nextdir)
             if not os.path.exists(nextdir):
@@ -96,19 +97,23 @@ class FTPSync(object):
                 print('****Folder: local curr path:', local_curr_path)
                 os.chdir(local_curr_path)
                 self.conn.cwd(ftp_curr_path)
-                self.downloadFileTree(d)
+                self.downloadRecursive(d)
         except ftplib.error_perm:
             print('ERROR: cannot read file "%s"' % f)
             os.unlink(f)
 
     def downloadWildcard(self, ftppath, wildcard):
+        self.conn.cwd(ftppath)
         files = self.listFile(ftppath)
         for f in files:
             if fnmatch.fnmatch(f, wildcard):
-                print(f)
-                self.downloadFile(f)
-
-
+                try:
+                    self.conn.retrbinary('RETR %s' % f, open(f, 'wb').write)
+                except ftplib.error_perm:
+                    print('ERROR: cannot read file "%s"' % f)
+                    os.unlink(f)
+                else:
+                    print('*** downloaded "%s" to local directory' % f)
 
     def quit(self):
         self.conn.quit()
@@ -117,32 +122,22 @@ class FTPSync(object):
 if __name__ == '__main__':
     dirname = 'download'
     host = '83.28.225.94'
+    ftppath = '/home/wasup/testftp'
     workdir = os.getcwd()
     if not os.path.exists(dirname):
         os.makedirs(dirname)
     os.chdir(dirname)
 
-    # ftp = FTPSync(host)
-    # ftp.login('wasup', 'wasup123')
-    # ftp.cwdDir('/home/wasup/testftp')
-    # # ftp.downloadFile('forDownload.txt')
-    # # ftp.uploadFile('forUpload.txt')
-    # ftp.downloadFileTree('.')
-    # ftp.quit()
-    # os.chdir(workdir)
-    #
-    # # with open('test.txt', 'rb') as f:
-    # #     lines = f.readlines()
-    # #     for line in lines:
-    # #         print(line)
-    # print(os.getcwd())
+    ftp = FTPSync(host)
+    ftp.login('wasup', 'wasup123')
+    # ftp.downloadFile(ftppath, 'forDownload.txt')
+    # ftp.uploadFile(ftppath, 'forUpload.txt')
+    # print(ftp.listFile(ftppath))
+    # print(ftp.listDir(ftppath))
+    ftp.downloadWildcard(ftppath, '*.log')
+    ftp.quit()
+    os.chdir(workdir)
 
-    files = os.listdir('/Users/liuqq/PycharmProjects/qqsite/util')
-    print(files)
-    for f in files:
-        if fnmatch.fnmatch(f, '*.py'):
-            # self.downloadFile(f)
-            print(f)
 
 
 
