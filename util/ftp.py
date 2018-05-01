@@ -58,7 +58,7 @@ class FTPSync(object):
 
     def uploadFile(self, ftppath, filename):
         try:
-            self.cwdDir(ftppath)
+            self.conn.cwd(ftppath)
             ftp_curr_path = self.conn.pwd()
             print('*** ftp current path  - "%s"' % ftp_curr_path)
             self.conn.storbinary('STOR %s' % filename, open(filename, 'rb'))
