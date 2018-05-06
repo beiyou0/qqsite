@@ -1,17 +1,30 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
+from django.http import Http404
+from django.template import loader
 from .models import Question
 
 
 # Create your views here.
 def index(request):
     latest_question_list = Question.objects.order_by('-pub_date')[:5]
-    output = ', '.join([q.question_text for q in latest_question_list])
-    return HttpResponse(output)
+    context = {'latest_question_list': latest_question_list}
+    # template = loader.get_template('polls/index.html')
+    # return HttpResponse(template.render(context, request))
+    return render(request, 'polls/index.html', context)
 
 
 def detail(request, question_id):
-    return HttpResponse("You're looking at question %s." % question_id)
+    # try:
+    #     question = Question.objects.get(pk=question_id)
+    #     template = loader.get_template('polls/detail.html')
+    #     context = {'question': question}
+    # except Question.DoesNotExist:
+    #     raise Http404("Question does not exist.")
+    # return HttpResponse(template.render(context, request))
+    question = get_object_or_404(Question, pk=question_id)
+    context = {'question': question}
+    return render(request, 'polls/detail.html', context)
 
 
 def results(request, question_id):
