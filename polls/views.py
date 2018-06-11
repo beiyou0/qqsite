@@ -46,3 +46,7 @@ def vote(request, question_id):
     return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
 
 
+def frontpage(request):
+    return render(request, 'polls/frontpage.html')
+
+
